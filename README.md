@@ -9,8 +9,8 @@ to Web Mercator, and builds a Leaflet overlay you can host on GitHub Pages.
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-# pull the latest cycle, first 6 hours, 8 km Web Mercator grid cropped to NA
-python scripts/build_rrfs_tiles.py --num-forecasts 6 --resolution-m 8000 --sample-stride 25
+# pull the latest cycle, first 18 hours (default), 8 km Web Mercator grid
+python scripts/build_rrfs_tiles.py --resolution-m 8000 --sample-stride 25
 ```
 
 Outputs land in `docs/`:
@@ -35,7 +35,7 @@ Commit/push `docs/` to publish with GitHub Pages (project/site mode).
   (6–8 km is a good balance).
 - `--sample-stride`: subsampling factor for building the KD‑tree. Lower = more
   accurate but slower. 20–30 works well.
-- `--num-forecasts`: how many forecast hours to fetch starting at f000.
+- `--num-forecasts`: how many forecast hours to fetch starting at f000 (default 18).
 - `--lon-min/--lon-max/--lat-min/--lat-max`: set a custom crop (defaults to NA).
 - `--auto-extent`: use the full native grid instead of the crop.
 

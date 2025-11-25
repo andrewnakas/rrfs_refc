@@ -400,7 +400,7 @@ def main():
     parser.add_argument(
         "--num-forecasts",
         type=int,
-        default=6,
+        default=18,
         help="How many forecast hours to process (starting at f000)",
     )
     parser.add_argument(

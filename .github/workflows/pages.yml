@@ -1,8 +1,10 @@
-name: Deploy Docs to Pages
+name: Build and Deploy RRFS REFC
 
 on:
   push:
     branches: [ main ]
+  schedule:
+    - cron: "5 * * * *"   # every hour at :05
   workflow_dispatch:
 
 permissions:
@@ -15,14 +17,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Clean previous artifacts
+        run: |
+          rm -rf docs/tiles docs/data.json data || true
+
+      - name: Build latest RRFS REFC tiles (first 18h)
+        run: |
+          python scripts/build_rrfs_tiles.py --num-forecasts 18 --resolution-m 8000 --sample-stride 25 --auto-extent
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
