@@ -442,6 +442,7 @@ def main():
     parser.add_argument(
         "--auto-extent",
         action="store_true",
+        default=True,
         help="Use full native grid extent instead of a North America crop.",
     )
     args = parser.parse_args()
