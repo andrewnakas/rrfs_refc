@@ -1,0 +1,99 @@
+{
+  "generated": "2025-11-25T14:38:25.929721+00:00",
+  "source": {
+    "cycle_date": "20251124",
+    "cycle_hour": "23",
+    "bucket": "https://noaa-rrfs-pds.s3.amazonaws.com",
+    "domain": "RRFS natlev 3km NA"
+  },
+  "bounds": {
+    "lat_min": 4.999999999999998,
+    "lat_max": 85.0,
+    "lon_min": -170.0,
+    "lon_max": -49.99999999999999,
+    "projection": "EPSG:3857",
+    "note": "Union of per-frame bounds (cropped to data coverage)"
+  },
+  "forecasts": [
+    {
+      "forecast_hour": 0,
+      "tile": "tiles/refc_f000.png",
+      "valid_time": "2025-11-24T23:00:00+00:00",
+      "stats": {
+        "min": -20.0,
+        "max": 64.13999938964844,
+        "mean": -17.779022216796875
+      },
+      "bounds": {
+        "lat_min": 4.999999999999998,
+        "lat_max": 84.9748749032282,
+        "lon_min": -170.0,
+        "lon_max": -49.99999999999999
+      }
+    },
+    {
+      "forecast_hour": 1,
+      "tile": "tiles/refc_f001.png",
+      "valid_time": "2025-11-25T00:00:00+00:00",
+      "stats": {
+        "min": -20.0,
+        "max": 63.150001525878906,
+        "mean": -17.3150634765625
+      },
+      "bounds": {
+        "lat_min": 4.999999999999998,
+        "lat_max": 84.9748749032282,
+        "lon_min": -170.0,
+        "lon_max": -49.99999999999999
+      }
+    },
+    {
+      "forecast_hour": 2,
+      "tile": "tiles/refc_f002.png",
+      "valid_time": "2025-11-25T01:00:00+00:00",
+      "stats": {
+        "min": -20.0,
+        "max": 66.04000091552734,
+        "mean": -16.75905990600586
+      },
+      "bounds": {
+        "lat_min": 4.999999999999998,
+        "lat_max": 85.0,
+        "lon_min": -170.0,
+        "lon_max": -49.99999999999999
+      }
+    },
+    {
+      "forecast_hour": 3,
+      "tile": "tiles/refc_f003.png",
+      "valid_time": "2025-11-25T02:00:00+00:00",
+      "stats": {
+        "min": -20.0,
+        "max": 64.80999755859375,
+        "mean": -16.14881134033203
+      },
+      "bounds": {
+        "lat_min": 4.999999999999998,
+        "lat_max": 85.0,
+        "lon_min": -170.0,
+        "lon_max": -49.99999999999999
+      }
+    },
+    {
+      "forecast_hour": 4,
+      "tile": "tiles/refc_f004.png",
+      "valid_time": "2025-11-25T03:00:00+00:00",
+      "stats": {
+        "min": -20.0,
+        "max": 64.41999816894531,
+        "mean": -15.623976707458496
+      },
+      "bounds": {
+        "lat_min": 4.999999999999998,
+        "lat_max": 85.0,
+        "lon_min": -170.0,
+        "lon_max": -49.99999999999999
+      }
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+.venv/
+data/
+tmp_refs_refc/
+__pycache__/
+*.pyc
+.DS_Store

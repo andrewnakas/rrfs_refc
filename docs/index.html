@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RRFS REFC – Leaflet Demo</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --panel: rgba(18, 22, 28, 0.85);
+      --accent: #3dd6ff;
+      --text: #e9edf5;
+      --muted: #8ea1b5;
+    }
+    * { box-sizing: border-box; }
+    body, html { margin: 0; height: 100%; font-family: "SF Pro Text", "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    #map { position: absolute; inset: 0; }
+    .panel {
+      position: absolute; top: 14px; left: 14px; padding: 12px 14px;
+      background: var(--panel); border: 1px solid #1f2a36; border-radius: 10px;
+      backdrop-filter: blur(12px); box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+      min-width: 240px; z-index: 1000;
+    }
+    .panel h1 { margin: 0 0 6px; font-size: 16px; letter-spacing: 0.01em; }
+    .panel .label { color: var(--muted); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .panel .value { margin: 2px 0 8px; font-size: 13px; }
+    .controls {
+      position: absolute; left: 14px; right: 14px; bottom: 14px;
+      background: var(--panel); border: 1px solid #1f2a36; border-radius: 12px;
+      padding: 12px 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;
+      backdrop-filter: blur(12px); z-index: 1000;
+    }
+    .btn {
+      background: #18202b; color: var(--text); border: 1px solid #233143;
+      padding: 8px 12px; border-radius: 8px; cursor: pointer; min-width: 80px;
+      font-size: 13px; transition: all 0.15s ease;
+    }
+    .btn:hover { background: #1f2a36; border-color: #2f4054; }
+    .btn.primary { background: var(--accent); color: #041018; border-color: var(--accent); font-weight: 600; }
+    .timeline { display: flex; align-items: center; gap: 10px; }
+    .timeline input[type=range] { width: 100%; accent-color: var(--accent); }
+    .legend {
+      position: absolute; right: 14px; top: 14px; padding: 10px 12px;
+      background: var(--panel); border: 1px solid #1f2a36; border-radius: 10px;
+      font-size: 11px; line-height: 1.3; z-index: 1000;
+    }
+    .legend-row { display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 8px; margin: 2px 0; }
+    .legend-swatch { height: 12px; border-radius: 4px; border: 1px solid #111; }
+    #message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text); font-size: 16px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="message">Loading RRFS REFC…</div>
+
+  <div class="panel" id="info" style="display:none;">
+    <h1>RRFS Composite Reflectivity</h1>
+    <div class="label">Cycle</div>
+    <div class="value" id="cycle"></div>
+    <div class="label">Valid Time</div>
+    <div class="value" id="valid"></div>
+    <div class="label">Data Range (dBZ)</div>
+    <div class="value" id="range"></div>
+  </div>
+
+  <div class="legend" id="legend" style="display:none;">
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(4,233,231)"></div><div>5–10</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(1,159,244)"></div><div>10–15</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(3,0,244)"></div><div>15–20</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(2,253,2)"></div><div>20–25</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(1,197,1)"></div><div>25–30</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(0,142,0)"></div><div>30–35</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(253,248,2)"></div><div>35–40</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(229,188,0)"></div><div>40–45</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(253,149,0)"></div><div>45–50</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(253,0,0)"></div><div>50–55</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(212,0,0)"></div><div>55–60</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(188,0,0)"></div><div>60–65</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(248,0,253)"></div><div>65–70</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(152,84,198)"></div><div>70–75</div></div>
+    <div class="legend-row"><div class="legend-swatch" style="background: rgb(253,253,253)"></div><div>75+</div></div>
+  </div>
+
+  <div class="controls" id="controls" style="display:none;">
+    <button class="btn" id="prev">◀︎ Prev</button>
+    <div class="timeline">
+      <input type="range" id="slider" min="0" max="0" value="0" step="1">
+      <div id="label" style="width:70px;text-align:right;font-variant-numeric:tabular-nums;">F000</div>
+    </div>
+    <button class="btn primary" id="play">▶ Play</button>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const message = document.getElementById('message');
+    const info = document.getElementById('info');
+    const controls = document.getElementById('controls');
+    const legend = document.getElementById('legend');
+    const slider = document.getElementById('slider');
+    const label = document.getElementById('label');
+    const playBtn = document.getElementById('play');
+    const prevBtn = document.getElementById('prev');
+    const validEl = document.getElementById('valid');
+    const rangeEl = document.getElementById('range');
+    const cycleEl = document.getElementById('cycle');
+
+    let map, overlay = null, frames = [], bounds = null, current = 0, playing = false, timer = null;
+
+    function initMap(b) {
+      map = L.map('map', { zoomSnap: 0.25, worldCopyJump: true });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap & CARTO'
+      }).addTo(map);
+      map.fitBounds([[b.lat_min, b.lon_min], [b.lat_max, b.lon_max]]);
+    }
+
+    function setFrame(idx) {
+      if (!frames[idx]) return;
+      current = idx;
+      const frame = frames[idx];
+      const b = frame.bounds || bounds;
+
+      if (overlay) overlay.remove();
+      overlay = L.imageOverlay(frame.tile, [[b.lat_min, b.lon_min], [b.lat_max, b.lon_max]], { opacity: 0.72, crossOrigin: true });
+      overlay.addTo(map);
+
+      slider.value = idx;
+      label.textContent = `F${String(frame.forecast_hour).padStart(3,'0')}`;
+      validEl.textContent = new Date(frame.valid_time).toUTCString();
+      rangeEl.textContent = `${frame.stats.min.toFixed(1)} – ${frame.stats.max.toFixed(1)} dBZ`;
+    }
+
+    function play() {
+      playing = true;
+      playBtn.textContent = '❚❚ Pause';
+      timer = setInterval(() => setFrame((current + 1) % frames.length), 600);
+    }
+    function pause() {
+      playing = false;
+      playBtn.textContent = '▶ Play';
+      clearInterval(timer);
+    }
+
+    async function bootstrap() {
+      try {
+        const res = await fetch('data.json', { cache: 'no-cache' });
+        if (!res.ok) throw new Error(`data.json ${res.status}`);
+        const data = await res.json();
+        if (!data.forecasts || !data.forecasts.length) throw new Error('No forecasts found in data.json');
+
+        frames = data.forecasts;
+        bounds = data.bounds;
+        initMap(bounds);
+
+        slider.max = frames.length - 1;
+        slider.oninput = e => { pause(); setFrame(Number(e.target.value)); };
+        playBtn.onclick = () => playing ? pause() : play();
+        prevBtn.onclick = () => { pause(); setFrame((current - 1 + frames.length) % frames.length); };
+
+        const c = data.source;
+        cycleEl.textContent = `${c.cycle_date} ${c.cycle_hour}Z`;
+
+        info.style.display = 'block';
+        controls.style.display = 'grid';
+        legend.style.display = 'block';
+        message.style.display = 'none';
+
+        setFrame(0);
+      } catch (err) {
+        message.textContent = `Error loading data.json: ${err.message}`;
+      }
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>
