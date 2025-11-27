@@ -137,12 +137,12 @@ def fetch_with_retry(
 # Cycle discovery and downloading
 # -----------------------------------------------------------------------------
 
-def discover_latest_cycle(max_hours_back: int = 12) -> Tuple[str, str]:
+def discover_cycle_with_hours(min_hours: int, max_hours_back: int = 24) -> Tuple[str, str, List[str]]:
     """
-    Find the most recent cycle that has natlev files available.
+    Find the most recent cycle that has at least `min_hours` forecast files.
 
     Returns:
-        (cycle_date 'YYYYMMDD', cycle_hour 'HH')
+        (cycle_date 'YYYYMMDD', cycle_hour 'HH', list_of_natlev_keys)
     """
     now = datetime.now(timezone.utc)
     for offset in range(max_hours_back):
@@ -159,9 +159,10 @@ def discover_latest_cycle(max_hours_back: int = 12) -> Tuple[str, str]:
             and k.endswith(".na.grib2")
             and not k.endswith(".idx")
         ]
-        if natlev:
-            return day, hh
-    raise RuntimeError("No recent RRFS natlev cycles found in the last window")
+        hours = select_forecast_hours(natlev, 9999)
+        if len(hours) >= min_hours:
+            return day, hh, natlev
+    raise RuntimeError("No recent RRFS natlev cycles with enough forecasts found")
 
 
 def list_natlev_files(day: str, hour: str) -> List[str]:
@@ -388,6 +389,10 @@ def select_forecast_hours(keys: List[str], limit: int) -> List[int]:
         except Exception:
             continue
     hours = sorted(set(hours))
+    if not hours:
+        return []
+    # ensure continuous sequence starting at 0
+    hours = [h for h in hours if h >= 0]
     return hours[:limit]
 
 
@@ -451,13 +456,12 @@ def main():
 
     if args.cycle:
         day, hour = args.cycle[:8], args.cycle[8:10]
+        natlev_keys = list_natlev_files(day, hour)
+        if not natlev_keys:
+            raise SystemExit("No natlev files found for selected cycle")
     else:
-        day, hour = discover_latest_cycle()
+        day, hour, natlev_keys = discover_cycle_with_hours(args.num_forecasts)
     print(f"Using cycle {day} {hour}z")
-
-    natlev_keys = list_natlev_files(day, hour)
-    if not natlev_keys:
-        raise SystemExit("No natlev files found for selected cycle")
 
     hours_to_do = select_forecast_hours(natlev_keys, args.num_forecasts)
     print(f"Processing forecast hours: {hours_to_do}")
