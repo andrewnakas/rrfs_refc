@@ -105,7 +105,7 @@
     const rangeEl = document.getElementById('range');
     const cycleEl = document.getElementById('cycle');
 
-    let map, overlay = null, frames = [], bounds = null, current = 0, playing = false, timer = null;
+    let map, overlayGroup = null, frames = [], bounds = null, current = 0, playing = false, timer = null;
 
     function initMap(b) {
       map = L.map('map', { zoomSnap: 0.25, worldCopyJump: true });
@@ -121,9 +121,15 @@
       const frame = frames[idx];
       const b = frame.bounds || bounds;
 
-      if (overlay) overlay.remove();
-      overlay = L.imageOverlay(frame.tile, [[b.lat_min, b.lon_min], [b.lat_max, b.lon_max]], { opacity: 0.72, crossOrigin: true });
-      overlay.addTo(map);
+      if (overlayGroup) overlayGroup.remove();
+      const overlays = [];
+      // base overlay
+      overlays.push(L.imageOverlay(frame.tile, [[b.lat_min, b.lon_min], [b.lat_max, b.lon_max]], { opacity: 0.72, crossOrigin: true }));
+      // wrap west (shift -360) so Asia/Russia can appear left of the dateline
+      overlays.push(L.imageOverlay(frame.tile, [[b.lat_min, b.lon_min - 360], [b.lat_max, b.lon_max - 360]], { opacity: 0.72, crossOrigin: true }));
+      // wrap east (shift +360) for completeness when panning far right
+      overlays.push(L.imageOverlay(frame.tile, [[b.lat_min, b.lon_min + 360], [b.lat_max, b.lon_max + 360]], { opacity: 0.72, crossOrigin: true }));
+      overlayGroup = L.layerGroup(overlays).addTo(map);
 
       slider.value = idx;
       label.textContent = `F${String(frame.forecast_hour).padStart(3,'0')}`;
